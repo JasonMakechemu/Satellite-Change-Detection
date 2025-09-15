@@ -7,6 +7,8 @@ In short - this code takes in satellite images, before and after, and outputs a 
 Firstly, put training data in the CWD
 Your current working directory (CWD) should look like this (LEVIR-CD layout):
 .
+
+
 ├─ train/
 │  ├─ A/      # before images
 │  ├─ B/      # after images
@@ -16,6 +18,7 @@ Your current working directory (CWD) should look like this (LEVIR-CD layout):
 ├─ test/  (optional)
 │  ├─ A/  B/  label/
 └─ satellite_change_detection.py
+
 
 The training data we use is here -> https://gts.ai/dataset-download/levir-cd/?utm_source=chatgpt.com
 
