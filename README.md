@@ -8,3 +8,8 @@ In short - this code takes in two satellite images, a before and after, and outp
 
 A more detailed explanation follows below, as well as instructions on how to run this code.
 
+Step 1:
+
+Install the dependencies.
+
+pip install torch torchvision opencv-python pillow numpy tqdm scikit-image
