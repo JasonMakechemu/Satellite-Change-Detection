@@ -20,7 +20,7 @@ Your current working directory (CWD) should look like this (LEVIR-CD layout):
 └─ satellite_change_detection.py
 
 
-The training data we use is here -> https://gts.ai/dataset-download/levir-cd/?utm_source=chatgpt.com
+The training data we use is here -> https://gts.ai/dataset-download/levir-cd/
 
 
 **Step 1:**
