@@ -1,12 +1,8 @@
 # Satellite-Change-Detection
 
-In this repository, I keep code that I developed for STAR.VISION Aerospace.
+In this repository, I keep code that I developed for STAR.VISION Aerospace. **satellite_change_detection.py** implements machine learnng change detection algorithms to detect chanegs in urbanisation in Southern Africa, particulary South Africa (the country).
 
-This code implements machine learnng change detection algorithms to detect chanegs in urbanisation in Southern Africa, particulary South Africa (the country).
-
-In short - this code takes in satellite images, before and after, and outputs a predicted mask showing the change from one image to the next.
-
-A more detailed explanation follows below, as well as instructions on how to run this code.
+In short - this code takes in satellite images, before and after, and outputs a predicted mask showing the change from one image to the next. A more detailed explanation follows below, as well as instructions on how to run this code.
 
 Firstly, put training data in the CWD
 Your current working directory (CWD) should look like this (LEVIR-CD layout):
@@ -110,3 +106,4 @@ Seams on big images → increase --overlap (e.g., 64).
 Shape mismatch error → ensure the paired images are the same width/height (LEVIR-CD is already aligned).
 
 
+_**app_streamlit.py**_ turns this code that I have written above into a lighwet web application with a functional UI to easily and accessibly run the change detection code.
