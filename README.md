@@ -4,9 +4,25 @@ In this repository, I keep code that I developed for STAR.VISION Aerospace.
 
 This code implements machine learnng change detection algorithms to detect chanegs in urbanisation in Southern Africa, particulary South Africa (the country).
 
-In short - this code takes in two satellite images, a before and after, and outputs a predicted mask showing the change from one image to the next.
+In short - this code takes in satellite images, before and after, and outputs a predicted mask showing the change from one image to the next.
 
 A more detailed explanation follows below, as well as instructions on how to run this code.
+
+Firstly, put training data in the CWD
+Your current working directory (CWD) should look like this (LEVIR-CD layout):
+.
+├─ train/
+│  ├─ A/      # before images
+│  ├─ B/      # after images
+│  └─ label/  # binary masks
+├─ val/   (optional but recommended)
+│  ├─ A/  B/  label/
+├─ test/  (optional)
+│  ├─ A/  B/  label/
+└─ satellite_change_detection.py
+
+The training data we use is here -> https://gts.ai/dataset-download/levir-cd/?utm_source=chatgpt.com
+
 
 **Step 1:**
 _Install the dependencies._
