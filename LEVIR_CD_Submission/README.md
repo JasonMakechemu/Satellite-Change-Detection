@@ -142,3 +142,19 @@ Using Your Own Images for Inference
    - Input images must be pixel-aligned and of the same size.
    - Use the `--tile` option for large images and `--align` if slight misalignment is present.
 
+
+
+Streamlit App for Satellite Change Detection
+-----------------------------------
+
+This Streamlit application provides an interactive interface for performing batch satellite image change detection using a pre-trained ONNX model. Users can upload a CSV file containing pairs of before and after images, select an ONNX model file, and configure prediction parameters such as tile size, overlap, probability threshold, and minimum blob size. The app supports sliding-window inference for large images and generates multiple outputs for each image pair, including binary change masks, overlay visualizations, probability heatmaps, RGB and grayscale difference images, and masked difference images. Users can preview all results directly in the browser and optionally save outputs to organized folders for further analysis.
+
+To run the app, first ensure that the required Python packages are installed:
+
+pip install streamlit onnxruntime opencv-python pillow pandas numpy
+
+Then start the app with:
+
+streamlit run streamlit_app/app.py
+
+In the web interface, select the ONNX model, upload your CSV file, adjust the parameters as needed, and view results in real time. Enabling the “Save outputs to folder” option will automatically write all generated files into structured directories for easy access and downstream processing.
