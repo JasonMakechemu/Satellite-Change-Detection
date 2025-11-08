@@ -1,112 +1,144 @@
-# Satellite-Change-Detection
+Project: LEVIR Change Detection ONNX Submission
 
-In this repository, I keep code that I developed for STAR.VISION Aerospace. **satellite_change_detection.py** implements machine learnng change detection algorithms to detect changes in urbanisation in Southern Africa, particulary South Africa (the country).
+1. ONNX Model
+--------------
+Location: onnx_model/model.onnx
+Description:
+  - Exported from PyTorch (Siamese U-Net) for change detection.
+  - Opset version < 13 to ensure compatibility with ONNX runtime.
+Usage:
+  - Loaded in inference.py for running predictions on image pairs.
 
-In short - this code takes in satellite images, before and after, and outputs a predicted mask showing the change from one image to the next. A more detailed explanation follows below, as well as instructions on how to run this code.
+2. Python Inference Script
+---------------------------
+Location: inference/inference.py
+Description:
+  - Reads test images (before/after pairs).
+  - Supports sliding-window tiling for large images.
+  - Runs ONNX inference to generate binary masks.
+  - Produces optional visualizations: overlays, heatmaps, RGB/gray differences.
+Dependencies (listed in requirements.txt):
+  - onnxruntime
+  - numpy
+  - opencv-python
+  - pillow
+  - tqdm
+Example Run:
+  python inference.py \
+      --onnx_model ../onnx_model/model.onnx \
+      --csv ../test_data/test.csv \
+      --outdir ../outputs/preds_val \
+      --overlay-dir ../outputs/overlays_val \
+      --heatmap-dir ../outputs/heats_val \
+      --diff-dir ../outputs/diffs_val \
+      --diff-gray-dir ../outputs/diffs_gray_val \
+      --diff-masked-dir ../outputs/diffs_masked_val \
+      --tile 512 --overlap 32 --thr 0.15 --min-blob 50
 
-Firstly, put training data in the CWD
-Your current working directory (CWD) should look like this (LEVIR-CD layout):
-.
+3. Test Data
+-------------
+Location: test_data/
+Contents:
+  - A/ : Before images
+  - B/ : After images
+  - label/ : Ground-truth masks (for optional accuracy verification)
+Notes:
+  - Used to validate the inference script and generate sample outputs.
 
+4. Outputs
+-----------
+Location: outputs/
+Description:
+  - preds_val/        : Binary masks (0/255) representing predicted changes.
+  - overlays_val/     : “Before” images overlaid with predicted changes in red.
+  - heats_val/        : Probability heatmaps of predicted changes.
+  - diffs_val/        : Absolute difference images in RGB.
+  - diffs_gray_val/   : Absolute difference images in grayscale.
+  - diffs_masked_val/ : RGB absolute difference masked by predicted changes.
 
-├─ train/
-│  ├─ A/      # before images
-│  ├─ B/      # after images
-│  └─ label/  # binary masks
-├─ val/   (optional but recommended)
-│  ├─ A/  B/  label/
-├─ test/  (optional)
-│  ├─ A/  B/  label/
-└─ satellite_change_detection.py
+5. How to Run
+--------------
+1) Set up the Python environment:
+   cd inference
+   python -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
 
+2) Run batch inference:
+   python inference.py \
+       --onnx_model ../onnx_model/model.onnx \
+       --csv ../test_data/test.csv \
+       --outdir ../outputs/preds_val \
+       --overlay-dir ../outputs/overlays_val \
+       --heatmap-dir ../outputs/heats_val \
+       --diff-dir ../outputs/diffs_val \
+       --diff-gray-dir ../outputs/diffs_gray_val \
+       --diff-masked-dir ../outputs/diffs_masked_val \
+       --tile 512 --overlap 32 --thr 0.15 --min-blob 50
 
-The training data we use is here -> https://gts.ai/dataset-download/levir-cd/
+3) Check the outputs in the outputs/ folder.
 
+6. Optional Accuracy Check
+---------------------------
+- If ground-truth labels are included, the script can compute IoU or other metrics to validate predictions.
+- Use test_data/label/ images as reference.
 
-**Step 1:**
-_Install the dependencies._
-
-pip install torch torchvision opencv-python pillow numpy tqdm scikit-image
-
-**Step 2:**
-_Generate csvs for the script._
-
-python satellite_change_detection.py make-csvs
-
-This scans ./train, ./val, ./test and writes:
-levir_train.csv
-levir_val.csv (if val/ exists)
-levir_test.csv (if test/ exists)
-
-**Step 3:**
-_Training the model._
-
-Default settings train on levir_train.csv and save model.pt in the CWD:
-
-python satellite_change_detection.py train
-
-Useful knobs:
-Faster/bigger tiles: --tile 256 (default) or --tile 512
-More/less epochs: --epochs 25
-Different learning rate: --lr 5e-4
-Change loss blend: --alpha 0.6 (BCE weight; rest is Dice)
-No internal val split (use your own val/ later): --val-frac 0.0
-Example:
-python satellite_change_detection.py train \
-  --epochs 25 --batch-size 8 --tile 256 --lr 1e-3 --alpha 0.7 --out model.pt
-
-**Step 4:**
-_Evaluating on the validation split._
-
-If you have val/, run:
-
-python satellite_change_detection.py eval
-
-(Uses levir_val.csv and model.pt by default.)
-
-Adjust threshold/cleanup if needed:
-python satellite_change_detection.py eval --thr 0.55 --min-blob 50
-
-**Step 5:**
-_Predict on a single before/after pair and save visuals._
-
-python satellite_change_detection.py predict \
-  --before val/A/1234.png --after val/B/1234.png \
-  --out pred_1234.png --thr 0.5 --min-blob 50 \
-  --overlay overlay_1234.png --overlay-on before --overlay-alpha 0.5 --outline \
-  --diff diff_rgb_1234.png \
-  --diff-gray diff_gray_1234.png \
-  --diff-masked diff_masked_1234.png \
-  --heatmap heat_1234.png
-  
-What you’ll get:
-pred_1234.png — binary change mask (0/255)
-overlay_1234.png — mask painted on the before image (red, semi-transparent, with contours)
-diff_rgb_1234.png — per-channel absolute difference
-diff_gray_1234.png — grayscale absolute difference
-diff_masked_1234.png — difference image only within predicted change regions
-heat_1234.png — probability heatmap (pre-threshold)
-If your own images are slightly misaligned, add --align. For large images, add --tile 512 --overlap 32
-
-**Step 6:**
-_Predict on batch of images in the csvs._
-
-This runs the model across all rows and writes outputs with the same base filename:
-python satellite_change_detection.py predict-batch \
-  --csv levir_val.csv \
-  --outdir preds_val \
-  --thr 0.5 --tile 512 --overlap 32 --min-blob 50 \
-  --overlay-dir overlays_val --overlay-on before --overlay-alpha 0.5 --outline \
-  --diff-dir diffs_val --diff-gray-dir diffs_gray_val --diff-masked-dir diffs_masked_val \
-  --heatmap-dir heats_val
-Resulting folders (created if missing): preds_val/, overlays_val/, diffs_val/, diffs_gray_val/, diffs_masked_val/, heats_val/.
-
-**Fixes to common issues:**
-
-All black / all white mask -> sweep --thr (0.3–0.7), check that training loss decreased, confirm your CSV rows actually include positives.
-Speckle → raise --min-blob, or slightly increase --thr.
-Seams on big images → increase --overlap (e.g., 64).
-Shape mismatch error → ensure the paired images are the same width/height (LEVIR-CD is already aligned).
+7. Packaging Notes
+------------------
+- The submission folder should include:
+    onnx_model/
+    inference/
+    test_data/
+    outputs/ (optional)
+    README.txt (this documentation)
+- Zip the entire folder for submission:
+    zip -r LEVIR_CD_Submission.zip LEVIR_CD_Submission/
+- Reviewer should be able to run the inference script using the ONNX model and reproduce all outputs.
 
 
-_**app_streamlit.py**_ turns this code that I have written above into a lighwet web application with a functional UI to easily and accessibly run the change detection code.
+
+Using Your Own Images for Inference
+-----------------------------------
+
+1. Folder Structure:
+   - Create a folder for your images with the following subfolders:
+
+     my_images/
+         A/      # "Before" images
+         B/      # "After" images
+         label/  # Optional: ground-truth masks for verification
+
+   - Filenames in A/ and B/ must match exactly (e.g., image_01.png in both folders).
+   - Labels are optional but recommended if you want to validate accuracy.
+
+2. Prepare a CSV:
+   - The inference script requires a CSV listing all image pairs. Example CSV format:
+
+     before,after,mask
+     my_images/A/image_01.png,my_images/B/image_01.png,my_images/label/image_01.png
+     my_images/A/image_02.png,my_images/B/image_02.png,my_images/label/image_02.png
+
+3. Run Inference:
+   - Use the CSV with the script and specify output directories:
+
+     python inference.py \
+         --onnx_model ../onnx_model/model.onnx \
+         --csv my_images.csv \
+         --outdir ../outputs/preds_my_images \
+         --overlay-dir ../outputs/overlays_my_images \
+         --heatmap-dir ../outputs/heats_my_images \
+         --diff-dir ../outputs/diffs_my_images \
+         --diff-gray-dir ../outputs/diffs_gray_my_images \
+         --diff-masked-dir ../outputs/diffs_masked_my_images \
+         --tile 512 --overlap 32 --thr 0.15 --min-blob 50
+
+4. Check Outputs:
+   - Binary masks and visualizations will appear in the specified output folders.
+   - Overlays show predicted changes on the "before" images.
+   - Heatmaps show the probability of change.
+   - Diff images show absolute differences between before and after images.
+
+5. Notes:
+   - Input images must be pixel-aligned and of the same size.
+   - Use the `--tile` option for large images and `--align` if slight misalignment is present.
+
