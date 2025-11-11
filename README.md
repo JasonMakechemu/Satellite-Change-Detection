@@ -1,5 +1,4 @@
 1. OVERVIEW
-
 ---
 
 This project provides tools for detecting changes between pairs of images (a "before" and an "after" image) using an ONNX model that expects a 6-channel input (3 channels from the before image and 3 from the after image).
