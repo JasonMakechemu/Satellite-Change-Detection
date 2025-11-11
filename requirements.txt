@@ -1,0 +1,8 @@
+numpy
+opencv-python
+Pillow
+onnx
+onnxruntime
+tqdm
+scikit-image
+torch
